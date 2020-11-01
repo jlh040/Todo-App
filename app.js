@@ -6,6 +6,7 @@ let counter = 0;
 let textValues = [];
 let strikethroughBoolean = {};
 let nextId = 0;
+let taskCounter = 0;
 
 // If there is something in localStorage, strikethroughBoolean MUST have those values.
 if (localStorage.getItem("strikethrough") !== null) {
@@ -26,14 +27,16 @@ for (let i = 0; i <= Object.keys(localStorage).length + 10; i++) {
 //then it will also have a strikethrough after refresh.
 function localStorageCreator(text) {
     const newLi = document.createElement("li");
-    const newP = document.createElement("p")
+    const newP = document.createElement("p");
     const xButton = document.createElement("button");
     const checkButton = document.createElement("button");
     
     newP.innerText = text;
-    xButton.innerHTML = "&cross;"
-    checkButton.innerHTML = "&check;"
-    xButton.classList.add("xbutton")
+    newP.id = "task_" + nextId;
+    nextId++;
+    xButton.innerHTML = "&cross;";
+    checkButton.innerHTML = "&check;";
+    xButton.classList.add("xbutton");
     checkButton.classList.add("checkbutton");
 
     newLi.append(checkButton);
@@ -41,10 +44,12 @@ function localStorageCreator(text) {
     newLi.append(newP);
 
     if (localStorage.getItem("strikethrough") !== null) {
-        if (JSON.parse(localStorage.getItem("strikethrough"))[newP.innerText] === true) {
+        if (JSON.parse(localStorage.getItem("strikethrough"))[`task_${taskCounter}`] === true) {
             newP.classList.add('strikethrough');
         }
-    }    
+    }
+    
+    taskCounter++;
     return newLi;
 }
 
@@ -95,11 +100,11 @@ ourUl.addEventListener("click", function(e) {
         let p = e.target.nextElementSibling.nextElementSibling
 
         if (p.classList.contains('strikethrough')) {
-            strikethroughBoolean[p.innerText] = false;
+            strikethroughBoolean[p.id] = false;
             p.classList.toggle('strikethrough');
             localStorage.setItem("strikethrough", JSON.stringify(strikethroughBoolean));
         } else {
-            strikethroughBoolean[p.innerText] = true;
+            strikethroughBoolean[p.id] = true;
             p.classList.toggle('strikethrough');
             localStorage.setItem("strikethrough", JSON.stringify(strikethroughBoolean));
         }
