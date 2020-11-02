@@ -16,10 +16,15 @@ if (localStorage.getItem("strikethrough") !== null) {
 //Without this, when you refresh the page the TODO's are not in the same order.
 for (let i = 0; i <= Object.keys(localStorage).length + 10; i++) {
     for (let j = 0; j <= Object.keys(localStorage).length + 10; j++) {
-        if (Object.keys(localStorage)[j] === `${i}`) {
+        if (Object.keys(localStorage)[j] === `task_${i}`) {
             textValues.push(Object.values(localStorage)[j]);
         }
     }
+}
+
+if (Object.keys(localStorage).length > 1) {
+    taskNumberRefresher();
+    paragraphIdRefresher();
 }
 
 //This is just a slight modification of toDoCreator(), we create a parameter 
@@ -68,7 +73,7 @@ function toDoCreator() {
     checkButton.innerHTML = "&check;"
     xButton.classList.add("xbutton")
     checkButton.classList.add("checkbutton");
-    localStorage.setItem(counter, textBox.value.trim());
+    localStorage.setItem("task_" + counter, textBox.value.trim());
 
 
     newLi.append(checkButton);
@@ -77,6 +82,42 @@ function toDoCreator() {
     counter += 1;
 
     return newLi;
+}
+
+function taskNumberRefresher() {
+    let localStorageDuplicate = JSON.stringify(localStorage);
+
+    for (let i = 0; i < Object.keys(JSON.parse(localStorageDuplicate)).length + 5; i++) {
+        delete localStorage["task_" + i];
+    }
+    
+    
+    for (let i = 0; i < Object.keys(JSON.parse(localStorageDuplicate)).length - 1; i++) {
+        localStorage["task_" + i] = textValues[i];
+    }
+}
+
+function paragraphIdRefresher() {
+    for (let i = 0; i < ourUl.children.length; i++) {
+        ourUl.children[i].lastChild.id = "task_" + i;
+    }
+}
+
+function strikethroughObjectRefresher() {
+    let strikethroughDuplicate = JSON.stringify(strikethroughBoolean);
+
+    for (let i = 0; i < Object.keys(JSON.parse(strikethroughDuplicate)).length + 5; i++) {
+        delete strikethroughBoolean["task_" + i];
+    }
+    
+    for (let i = 0; i < Object.values(JSON.parse(strikethroughDuplicate)).length; i++) {
+        if (Object.values(JSON.parse(strikethroughDuplicate))[i] === true) {
+            strikethroughBoolean["task_" + i] = true;
+        } else {
+            strikethroughBoolean["task_" + i] = false;
+        }
+    }
+    localStorage.setItem("strikethrough", JSON.stringify(strikethroughBoolean));
 }
 
 //This is going to take the paragraph text in local storage, and use it to make new TODO's upon refresh.
@@ -110,7 +151,10 @@ ourUl.addEventListener("click", function(e) {
         }
     }
     else if (e.target.classList.contains("xbutton")) {
-        localStorage.removeItem(e.target.nextElementSibling.innerText);
+        localStorage.removeItem(e.target.nextElementSibling.id);
+        delete strikethroughBoolean[e.target.nextElementSibling.id]
+        localStorage.setItem("strikethrough", JSON.stringify(strikethroughBoolean));
+        strikethroughObjectRefresher();
         e.target.parentElement.remove();
     }
 })
