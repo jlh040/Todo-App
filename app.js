@@ -103,23 +103,6 @@ function paragraphIdRefresher() {
     }
 }
 
-function strikethroughObjectRefresher() {
-    let strikethroughDuplicate = JSON.stringify(strikethroughBoolean);
-
-    for (let i = 0; i < Object.keys(JSON.parse(strikethroughDuplicate)).length + 5; i++) {
-        delete strikethroughBoolean["task_" + i];
-    }
-    
-    for (let i = 0; i < Object.values(JSON.parse(strikethroughDuplicate)).length; i++) {
-        if (Object.values(JSON.parse(strikethroughDuplicate))[i] === true) {
-            strikethroughBoolean["task_" + i] = true;
-        } else {
-            strikethroughBoolean["task_" + i] = false;
-        }
-    }
-    localStorage.setItem("strikethrough", JSON.stringify(strikethroughBoolean));
-}
-
 //This is going to take the paragraph text in local storage, and use it to make new TODO's upon refresh.
 for (let i = 0; i < textValues.length; i++) {
     ourUl.append(localStorageCreator(textValues[i]));
@@ -153,8 +136,17 @@ ourUl.addEventListener("click", function(e) {
     else if (e.target.classList.contains("xbutton")) {
         localStorage.removeItem(e.target.nextElementSibling.id);
         delete strikethroughBoolean[e.target.nextElementSibling.id]
+        for (let i = 0; i < ourUl.childElementCount; i++) {
+            if (e.target.nextElementSibling.id === `task_${i}`) {
+                for (let j = i; j < ourUl.childElementCount; j++) {
+                    if (`task_${j + 1}` in strikethroughBoolean) {
+                        strikethroughBoolean[`task_${j}`] = strikethroughBoolean[`task_${j + 1}`];
+                        delete strikethroughBoolean[`task_${j + 1}`]
+                    }
+                }
+            }
+        }
         localStorage.setItem("strikethrough", JSON.stringify(strikethroughBoolean));
-        strikethroughObjectRefresher();
         e.target.parentElement.remove();
     }
 })
